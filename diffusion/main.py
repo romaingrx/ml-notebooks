@@ -2,6 +2,7 @@
 # %load_ext autoreload
 # %autoreload 2
 
+import matplotlib.pyplot as plt
 import torch
 import torchvision
 from torch import nn
@@ -54,7 +55,7 @@ class BasicUNet(nn.Module):
         self.downscale = nn.MaxPool2d(2)
         self.upscale = nn.Upsample(scale_factor=2)
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         h = []
         for i, l in enumerate(self.down_layers):
             x = self.act(l(x))  # Through the layer and the activation function
@@ -72,8 +73,76 @@ class BasicUNet(nn.Module):
 
 
 # %% Util cell
-net = BasicUNet()
-x = torch.rand(8, 1, 28, 28)
-net(x).shape
+# Dataloader (you can mess with batch size)
+batch_size = 128
+train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-sum([p.numel() for p in net.parameters()])
+# How many runs through the data should we do?
+n_epochs = 3
+
+# Create the network
+net = BasicUNet()
+net.to(device)
+
+# Our loss function
+loss_fn = nn.MSELoss()
+
+# The optimizer
+opt = torch.optim.Adam(net.parameters(), lr=1e-3)
+
+# Keeping a record of the losses for later viewing
+losses: list[float] = []
+
+# The training loop
+for epoch in range(n_epochs):
+    for x, y in train_dataloader:
+        # Get some data and prepare the corrupted version
+        x = x.to(device)  # Data on the GPU
+        noise_amount = torch.rand(x.shape[0]).to(device)  # Pick random noise amounts
+        noisy_x = corrupt(x, noise_amount)  # Create our noisy x
+
+        # Get the model prediction
+        pred = net(noisy_x)
+
+        # Calculate the loss
+        loss = loss_fn(pred, x)  # How close is the output to the true 'clean' x?
+
+        # Backprop and update the params:
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+
+        # Store the loss for later
+        losses.append(loss.item())
+
+    # Print our the average of the loss values for this epoch:
+    avg_loss = sum(losses[-len(train_dataloader) :]) / len(train_dataloader)
+    print(f"Finished epoch {epoch}. Average loss for this epoch: {avg_loss:05f}")
+
+# View the loss curve
+plt.plot(losses)
+plt.ylim(0, 0.1)
+
+# %%
+# @markdown Visualizing model predictions on noisy inputs:
+
+# Fetch some data
+x, y = next(iter(train_dataloader))
+x = x[:8]  # Only using the first 8 for easy plotting
+
+# Corrupt with a range of amounts
+amount = torch.linspace(0, 1, x.shape[0])  # Left to right -> more corruption
+noised_x = corrupt(x, amount)
+
+# Get the model predictions
+with torch.no_grad():
+    preds = net(noised_x.to(device)).detach().cpu()
+
+# Plot
+fig, axs = plt.subplots(3, 1, figsize=(12, 7))
+axs[0].set_title("Input data")
+axs[0].imshow(torchvision.utils.make_grid(x)[0].clip(0, 1), cmap="Greys")
+axs[1].set_title("Corrupted data")
+axs[1].imshow(torchvision.utils.make_grid(noised_x)[0].clip(0, 1), cmap="Greys")
+axs[2].set_title("Network Predictions")
+axs[2].imshow(torchvision.utils.make_grid(preds)[0].clip(0, 1), cmap="Greys")

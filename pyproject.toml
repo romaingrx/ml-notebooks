@@ -10,3 +10,8 @@ dependencies = []
 [tool.uv.workspace]
 members = ["*"]
 exclude = [".venv", ".git"]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.1a19",
+]

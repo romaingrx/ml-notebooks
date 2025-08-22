@@ -1,5 +1,7 @@
 # Core problem
 
+> I'm not 100% sure that there are no mistakes in these notations.
+
 We want to learn the distribution of $p(x|z)$ to be able to generate new samples of the data by sampling $z \sim p(z)$ and then $x \sim p(x|z)$.
 
 The main objective is to maximize the log-likelihood of our data, basically learning the distribution of the data, i.e. 

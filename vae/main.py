@@ -2,6 +2,7 @@
 # %load_ext autoreload
 # %autoreload 2
 
+import matplotlib.pyplot as plt
 import torch
 import torchvision
 from einops import rearrange
@@ -142,7 +143,6 @@ for epoch in range(10):
 
 # %%
 
-import matplotlib.pyplot as plt
 
 plt.plot(losses)
 plt.show()

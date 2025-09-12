@@ -3,10 +3,10 @@
 # %autoreload 2
 
 import random
-from collections import deque, namedtuple
+from collections import deque
 from dataclasses import dataclass, field
 from itertools import count
-from typing import cast
+from typing import NamedTuple, cast
 
 import gymnasium as gym
 import matplotlib
@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn, optim
+from torch._tensor import Tensor
 from tqdm import tqdm
 
 from shared import get_device
@@ -35,19 +36,24 @@ plt.ion()
 
 # %%
 
-Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
+
+class Transition(NamedTuple):
+    state: torch.Tensor
+    action: torch.Tensor
+    next_state: torch.Tensor | None
+    reward: torch.Tensor
 
 
 class ReplayMemory:
     def __init__(self, capacity: int):
-        self.memory = deque[Transition]([], maxlen=capacity)
+        self.memory: deque[Transition] = deque(maxlen=capacity)
 
-    def push(self, *args: Transition):
+    def push(self, transition: Transition):
         """Save a transition"""
-        self.memory.append(Transition(*args))
+        self.memory.append(transition)
 
     def sample(self, batch_size: int) -> list[Transition]:
-        return cast(list[Transition], random.sample(self.memory, batch_size))
+        return random.sample(self.memory, batch_size)
 
     def __len__(self) -> int:
         return len(self.memory)
@@ -59,11 +65,11 @@ class ReplayMemory:
 class DQN(nn.Module):
     def __init__(self, *, in_features: int, n_actions: int):
         super(DQN, self).__init__()
-        self.in_features = in_features
-        self.n_actions = n_actions
-        self.fc1 = nn.Linear(self.in_features, 32)
-        self.fc2 = nn.Linear(32, 32)
-        self.fc3 = nn.Linear(32, self.n_actions)
+        self.in_features: int = in_features
+        self.n_actions: int = n_actions
+        self.fc1: nn.Linear = nn.Linear(self.in_features, 32)
+        self.fc2: nn.Linear = nn.Linear(32, 32)
+        self.fc3: nn.Linear = nn.Linear(32, self.n_actions)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = F.relu(self.fc1(x))
@@ -188,7 +194,7 @@ for episode in trange:
     trange.set_postfix({"timesteps": np.mean(tracker.timesteps[-50:])})
 
     obs, info = env.reset()
-    state = obs_to_state(obs)
+    state: Tensor = obs_to_state(obs)
 
     for t in tqdm(count(), desc="Timesteps", leave=False):
         action = select_action(state)
@@ -198,7 +204,7 @@ for episode in trange:
 
         next_state = obs_to_state(obs) if not terminated else None
 
-        memory.push(state, action, next_state, reward)
+        memory.push(Transition(state, action, next_state, reward))
 
         optim_model()
         soft_update()

@@ -216,11 +216,13 @@ for episode in trange:
             tracker.timesteps.append(t)
             break
 
+torch.save(target_net.state_dict(), "models/dqn.pth")
 plt.plot(tracker.timesteps)
 plt.show()
 
 # %%
 
+target_net.load_state_dict(torch.load("models/dqn.pth"))
 env = gym.make("CartPole-v1", render_mode="human")
 for _ in range(5):
     obs, info = env.reset()

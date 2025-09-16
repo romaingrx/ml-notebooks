@@ -6,6 +6,7 @@ import random
 from collections import deque
 from dataclasses import dataclass, field
 from itertools import count
+from pathlib import Path
 from typing import NamedTuple, cast
 
 import gymnasium as gym
@@ -22,6 +23,7 @@ from shared import get_device
 
 device = get_device()
 print(f"Using device: {device}")
+MODEL_PATH = Path("models/dqn.pth")
 
 # %%
 
@@ -216,13 +218,14 @@ for episode in trange:
             tracker.timesteps.append(t)
             break
 
-torch.save(target_net.state_dict(), "models/dqn.pth")
+MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+torch.save(target_net.state_dict(), MODEL_PATH)
 plt.plot(tracker.timesteps)
 plt.show()
 
 # %%
 
-target_net.load_state_dict(torch.load("models/dqn.pth"))
+target_net.load_state_dict(torch.load(MODEL_PATH))
 env = gym.make("CartPole-v1", render_mode="human")
 for _ in range(5):
     obs, info = env.reset()

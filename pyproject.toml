@@ -12,6 +12,7 @@ members = ["*"]
 exclude = [".venv", ".git"]
 
 [dependency-groups]
-dev = [
-    "ty>=0.0.1a19",
-]
+dev = ["ty>=0.0.1a19"]
+
+[tool.ruff.lint]
+ignore = ["E731"]

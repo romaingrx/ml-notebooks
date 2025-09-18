@@ -2,7 +2,13 @@
 name = "gpu"
 version = "0.1.0"
 requires-python = ">=3.13"
-dependencies = ["pandas>=2.3.2", "torch>=2.8.0", "triton>=3.4.0", "shared"]
+dependencies = [
+    "pandas>=2.3.2",
+    "torch>=2.8.0",
+    "triton>=3.4.0",
+    "shared",
+    "matplotlib>=3.10.5",
+]
 
 [tool.uv.sources]
 shared = { workspace = true }

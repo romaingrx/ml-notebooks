@@ -343,6 +343,7 @@ version = "0.1.0"
 source = { virtual = "gpu" }
 dependencies = [
     { name = "pandas" },
+    { name = "shared" },
     { name = "torch" },
     { name = "triton" },
 ]
@@ -357,6 +358,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "pandas", specifier = ">=2.3.2" },
+    { name = "shared", editable = "shared" },
     { name = "torch", specifier = ">=2.8.0" },
     { name = "triton", specifier = ">=3.4.0" },
 ]

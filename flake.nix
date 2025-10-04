@@ -25,10 +25,25 @@
         mkShell rec {
 
           packages = [
+            cmake
+            ninja
             cudaPackages.cudatoolkit
+            cudaPackages.cuda_cudart
+            cudaPackages.cuda_cupti
+            cudaPackages.cuda_nvrtc
+            cudaPackages.cuda_nvtx
+            cudaPackages.cudnn
+            cudaPackages.libcublas
+            cudaPackages.libcufft
+            cudaPackages.libcurand
+            cudaPackages.libcusolver
+            cudaPackages.libcusparse
+            cudaPackages.libnvjitlink
+            cudaPackages.nccl
             nix-gl-host.defaultPackage.x86_64-linux
             uv
             python312
+            zlib
           ];
 
           shellHook = ''

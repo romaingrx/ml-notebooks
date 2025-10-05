@@ -26,20 +26,19 @@
 
           packages = [
             cmake
-            ninja
             cudaPackages.cudatoolkit
             cudaPackages.cuda_cudart
-            cudaPackages.cuda_cupti
-            cudaPackages.cuda_nvrtc
-            cudaPackages.cuda_nvtx
-            cudaPackages.cudnn
-            cudaPackages.libcublas
-            cudaPackages.libcufft
-            cudaPackages.libcurand
-            cudaPackages.libcusolver
-            cudaPackages.libcusparse
-            cudaPackages.libnvjitlink
-            cudaPackages.nccl
+            # cudaPackages.cuda_cupti
+            # cudaPackages.cuda_nvrtc
+            # cudaPackages.cuda_nvtx
+            # cudaPackages.cudnn
+            # cudaPackages.libcublas
+            # cudaPackages.libcufft
+            # cudaPackages.libcurand
+            # cudaPackages.libcusolver
+            # cudaPackages.libcusparse
+            # cudaPackages.libnvjitlink
+            # cudaPackages.nccl
             nix-gl-host.defaultPackage.x86_64-linux
             uv
             python312
@@ -51,6 +50,7 @@
               uv sync
               . .venv/bin/activate
             fi
+            export CUDA_HOME="${pkgs.cudaPackages.cudatoolkit}"
             export LD_LIBRARY_PATH=$(nixglhost -p):$LD_LIBRARY_PATH
             export LD_LIBRARY_PATH="${lib.makeLibraryPath packages}:$LD_LIBRARY_PATH"
             export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
